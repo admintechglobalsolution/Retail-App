@@ -1,4 +1,4 @@
-// src/screens/ForgotPasswordScreen.tsx
+// FINAL BEST VERSION (Recommended)
 import Colors from "@/theme/colors";
 import Spacing from "@/theme/spacing";
 import Typography from "@/theme/typography";
@@ -14,7 +14,6 @@ import { TextInput } from "react-native-paper";
 import CustomButton from "../components/shared/Button";
 import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
-import Loader from "../components/shared/Loader";
 import RowLink from "../components/shared/RowLink";
 
 const ForgotPasswordScreen: React.FC = () => {
@@ -30,19 +29,13 @@ const ForgotPasswordScreen: React.FC = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Single message for success or error
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
 
-  // ---------- Send OTP ----------
+  // ------------------- SEND OTP -------------------
   const handleSendOTP = () => {
     setMessage("");
 
-    if (!phone.trim()) {
-      setMessage("Phone number is required");
-      setMessageType("error");
-      return;
-    }
     if (!/^\d{10}$/.test(phone.trim())) {
       setMessage("Enter a valid 10-digit phone number");
       setMessageType("error");
@@ -55,10 +48,10 @@ const ForgotPasswordScreen: React.FC = () => {
       setOtpSent(true);
       setMessage("OTP sent successfully");
       setMessageType("success");
-    }, 1500);
+    }, 1200);
   };
 
-  // ---------- Submit New Password ----------
+  // ------------------- RESET PASSWORD -------------------
   const handleSubmitNewPassword = () => {
     setMessage("");
 
@@ -88,8 +81,8 @@ const ForgotPasswordScreen: React.FC = () => {
 
       setTimeout(() => {
         navigation.navigate("Login");
-      }, 1000);
-    }, 1500);
+      }, 600);
+    }, 1200);
   };
 
   return (
@@ -108,6 +101,7 @@ const ForgotPasswordScreen: React.FC = () => {
           align="center"
         />
 
+        {/* Step 1: Enter Phone */}
         {!otpSent ? (
           <>
             <TextInput
@@ -125,16 +119,16 @@ const ForgotPasswordScreen: React.FC = () => {
             <CustomButton
               title="Send OTP"
               onPress={handleSendOTP}
-              disabled={!phone.trim()}
               loading={loading}
+              disabled={loading || phone.trim().length !== 10}
             />
           </>
         ) : (
           <>
+            {/* Step 2: Enter New Password */}
             <TextInput
               mode="flat"
               label="New Password"
-              placeholder="Enter your password"
               secureTextEntry={!showNewPassword}
               activeUnderlineColor={Colors.primary}
               style={[styles.input, { backgroundColor: Colors.white }]}
@@ -151,7 +145,6 @@ const ForgotPasswordScreen: React.FC = () => {
             <TextInput
               mode="flat"
               label="Confirm Password"
-              placeholder="Re-enter password"
               secureTextEntry={!showConfirmPassword}
               activeUnderlineColor={Colors.primary}
               style={[styles.input, { backgroundColor: Colors.white }]}
@@ -169,7 +162,12 @@ const ForgotPasswordScreen: React.FC = () => {
               title="Submit"
               onPress={handleSubmitNewPassword}
               loading={loading}
-              disabled={!newPassword || !confirmPassword}
+              disabled={
+                loading ||
+                !newPassword ||
+                !confirmPassword ||
+                newPassword.length < 8
+              }
             />
           </>
         )}
@@ -179,13 +177,10 @@ const ForgotPasswordScreen: React.FC = () => {
         <RowLink
           center
           leftLabel="Already have an account?"
-          leftHighlight={false}
           rightLabel="Login"
-          rightHighlight={true}
-          onRightPress={() => navigation.navigate("Login" as never)}
+          rightHighlight
+          onRightPress={() => navigation.navigate("Login")}
         />
-
-        {loading && <Loader />}
       </ScrollView>
     </KeyboardAvoidingView>
   );

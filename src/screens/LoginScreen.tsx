@@ -16,7 +16,6 @@ import { TextInput } from "react-native-paper";
 import CustomButton from "../components/shared/Button";
 import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
-import Loader from "../components/shared/Loader";
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -48,12 +47,14 @@ const LoginScreen: React.FC = () => {
     }
 
     setLoading(true);
+
     setTimeout(() => {
       setLoading(false);
 
       if (phone === "1234567890" && password === "password") {
         setMessage("Login successful!");
         setMessageType("success");
+
         setTimeout(() => {
           navigation.navigate("Home" as never);
         }, 1000);
@@ -117,10 +118,10 @@ const LoginScreen: React.FC = () => {
           title="Login"
           onPress={handleLogin}
           loading={loading}
-          disabled={!phone.trim() || !password.trim()}
+          disabled={!phone.trim() || !password.trim() || loading}
         />
 
-        {/* Unified Inline Message */}
+        {/* Inline Message */}
         {message && <InlineMessage message={message} type={messageType} />}
 
         {/* Bottom Links */}
@@ -132,8 +133,6 @@ const LoginScreen: React.FC = () => {
           rightHighlight={true}
           onRightPress={() => navigation.navigate("SignUp" as never)}
         />
-
-        {loading && <Loader />}
       </ScrollView>
     </KeyboardAvoidingView>
   );
