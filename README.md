@@ -14,6 +14,10 @@ The default `app/` directory used by Expo Router remains **untouched**, and the 
 
 ---
 
+## Test Cases
+
+C:\Users\NAVEEN\Desktop\ReactNative\my-appk\.github\workflows\ci.yml
+
 ## 🚀 Tech Stack
 
 | Category        | Technology                                                 |
@@ -30,7 +34,7 @@ The default `app/` directory used by Expo Router remains **untouched**, and the 
 
 ## 📦 Installation
 
-````bash
+```bash
 pnpm install
 pnpm expo start
 
@@ -70,6 +74,7 @@ C:.
 ├───.expo
 │   │   devices.json
 │   │   README.md
+│   │   settings.json
 │   │
 │   ├───types
 │   │       router.d.ts
@@ -97,10 +102,6 @@ C:.
 │
 ├───assets
 │   ├───fonts
-│   │       magneto.TTF
-│   │       momo.ttf
-│   │       Ponnala.ttf
-│   │
 │   └───images
 │           android-icon-background.png
 │           android-icon-foreground.png
@@ -122,10 +123,7 @@ C:.
 │   │
 │   ├───assets
 │   │   ├───fonts
-│   │   │       Inter-Regular.ttf
 │   │   │       magneto.ttf
-│   │   │       momo.ttf
-│   │   │       Ponnala.ttf
 │   │   │
 │   │   ├───images
 │   │   │       logo.png
@@ -142,6 +140,7 @@ C:.
 │   │   │       Header.tsx
 │   │   │       Icon.tsx
 │   │   │       index.ts
+│   │   │       InlineMessage.tsx
 │   │   │       Loader.tsx
 │   │   │       RowLink.tsx
 │   │   │
@@ -164,6 +163,7 @@ C:.
 │   │       SettingsPage.tsx
 │   │
 │   ├───screens
+│   │   │   ForgotPasswordScreen.tsx
 │   │   │   LoginScreen.tsx
 │   │   │   NotFoundScreen.tsx
 │   │   │   SignUpScreen.tsx
@@ -204,5 +204,5 @@ C:.
         │   App.test.tsx
         │
         └───components
-                Button.test.tsx```
-````
+                Button.test.tsx
+```
