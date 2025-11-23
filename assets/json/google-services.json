@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "34190543414",
+    "project_id": "retail-kart",
+    "storage_bucket": "retail-kart.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34190543414:android:e342acf401974dbaaa6697",
+        "android_client_info": {
+          "package_name": "com.naveen.myappk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFbxFUf2GT4n3TSREU5rg4WPpb0Dp7tHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

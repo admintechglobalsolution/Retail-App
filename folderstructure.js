@@ -16,9 +16,10 @@ const path = require("path");
 
 const root = process.cwd();
 
-// ---- Ensure root-level .env / .env.example ----
+// ---- Ensure root-level  ----
 const envFile = path.join(root, ".env");
 const envExampleFile = path.join(root, ".env.example");
+const metroConfigFile = path.join(root, "metro.config.js");
 const declarationsFile = path.join(root, "declarations.d.ts");
 
 if (!fs.existsSync(envFile)) {
@@ -32,6 +33,11 @@ if (!fs.existsSync(envExampleFile)) {
     "API_URL=<YOUR_API_URL>\nTOKEN=<YOUR_TOKEN>\n"
   );
   console.log("✔️ Created .env.example");
+}
+
+if (!fs.existsSync(metroConfigFile)) {
+  fs.writeFileSync(metroConfigFile, "");
+  console.log("✔️ Created empty metro.config.js");
 }
 
 // declarations.d.ts (silent creation, full asset coverage)
@@ -179,6 +185,16 @@ jobs:
         "client.ts": "// axios instance / baseURL",
         "auth.ts": "// login / logout / register",
       },
+      firebase: {
+        "firebaseInit.ts": "// firebase initializeApp",
+        "firebaseConfig.ts": "// firebase config",
+        "firebaseAuth.ts": "// firebase auth methods",
+        "userService.ts": "// Realtime DB: save user data",
+        "authService.ts": "// Firebase Auth methods",
+      },
+      validation: {
+        "validationService.ts": "// form validation methods",
+      },
       "storage.ts": "// AsyncStorage / MMKV wrapper",
     },
 
@@ -218,6 +234,7 @@ jobs:
 
     types: {
       "index.d.ts": "// global types",
+      "navigation.ts": "// navigation types",
     },
   },
 

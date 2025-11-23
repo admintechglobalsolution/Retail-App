@@ -1,10 +1,13 @@
 // src/screens/SignUpScreen.tsx
+
 import RowLink from "@/components/shared/RowLink";
 import Colors from "@/theme/colors";
 import Spacing from "@/theme/spacing";
 import Typography from "@/theme/typography";
+
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useState } from "react";
+
 import {
   KeyboardAvoidingView,
   Platform,
@@ -12,11 +15,17 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+
 import { TextInput } from "react-native-paper";
+
 import CustomButton from "../components/shared/Button";
 import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
 import Loader from "../components/shared/Loader";
+
+// Firebase
+import { createUserInDB } from "@/services/firebase/userService";
+import { v4 as uuidv4 } from "uuid";
 
 const SignUpScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -26,19 +35,21 @@ const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     setMessage("");
 
+    // VALIDATIONS
     if (!username.trim()) {
       setMessage("Username is required");
       setMessageType("error");
       return;
     }
+
     if (username.trim().length < 8) {
       setMessage("Username must be at least 8 characters");
       setMessageType("error");
@@ -50,6 +61,7 @@ const SignUpScreen: React.FC = () => {
       setMessageType("error");
       return;
     }
+
     if (!/^\d{10}$/.test(phone.trim())) {
       setMessage("Enter a valid 10-digit phone number");
       setMessageType("error");
@@ -61,6 +73,7 @@ const SignUpScreen: React.FC = () => {
       setMessageType("error");
       return;
     }
+
     if (!/\S+@\S+\.\S+/.test(email.trim())) {
       setMessage("Enter a valid email");
       setMessageType("error");
@@ -72,22 +85,39 @@ const SignUpScreen: React.FC = () => {
       setMessageType("error");
       return;
     }
+
     if (password.length < 8) {
       setMessage("Password must be at least 8 characters");
       setMessageType("error");
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    // SAVE TO FIREBASE
+    try {
+      setLoading(true);
+
+      const uid = uuidv4(); // unique user id
+
+      await createUserInDB(uid, {
+        uid,
+        username,
+        phone,
+        email,
+        createdAt: Date.now(),
+      });
+
       setMessage("Account created successfully!");
       setMessageType("success");
 
       setTimeout(() => {
         navigation.navigate("Login" as never);
-      }, 800);
-    }, 1500);
+      }, 1200);
+    } catch (error) {
+      setMessage("Error creating account. Try again.");
+      setMessageType("error");
+    }
+
+    setLoading(false);
   };
 
   return (

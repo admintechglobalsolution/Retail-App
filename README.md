@@ -2,6 +2,7 @@
 
 This project is built using **Expo** and organized with a clean and scalable **SRC-based architecture**.  
 The default `app/` directory used by Expo Router remains **untouched**, and the project can be developed entirely from `src/`.
+Retail_Kart (com.naveen.myappk)
 
 ---
 
@@ -37,11 +38,14 @@ C:\Users\NAVEEN\Desktop\ReactNative\my-appk\.github\workflows\ci.yml
 ```bash
 pnpm install
 pnpm expo start
-
+pnpm add appwrite
 pnpm add react-native-paper
 pnpm add react-native-safe-area-context
 pnpm add @react-navigation/native @react-navigation/native-stack
 pnpm add react-native-toast-message
+pnpm add uuid
+pnpm add @react-native-async-storage/async-storage
+pnpm add firebase@latest
 
 ---
 
@@ -66,6 +70,7 @@ C:.
 │   eslint.config.js
 │   expo-env.d.ts
 │   folderstructure.js
+│   metro.config.js
 │   package.json
 │   pnpm-lock.yaml
 │   README.md
@@ -123,6 +128,7 @@ C:.
 │   │
 │   ├───assets
 │   │   ├───fonts
+│   │   │       Inter-Regular.ttf
 │   │   │       magneto.ttf
 │   │   │
 │   │   ├───images
@@ -192,6 +198,7 @@ C:.
 │   │
 │   ├───types
 │   │       index.d.ts
+│   │       navigation.ts
 │   │
 │   └───utils
 │           fonts.ts
@@ -205,4 +212,22 @@ C:.
         │
         └───components
                 Button.test.tsx
+
+##not used so for
+.github\workflows\ci.yml -> WORKFLOW Test
+src\assets\json\sample-data.json --> sample data
+src\assets\loaders\spinner.json -> spinners
+src\components\ui -> ?
+src\constants\index.ts -> ?
+src\hooks\useAuth.ts -->
+src\hooks\useFetch.ts -->
+src\store\index.ts --> redux
+src\services\api\auth.ts -> // login / logout / register
+src\services\api\client.ts --> // axios instance / baseURL
+src\services\storage.ts --> AsyncStorage
+src\types\index.d.ts --> // global types
+src\utils\format.ts --> // format helpers
+tests\setupTests.ts --> test cases
+.env --> token
+.env.example --> git
 ```
