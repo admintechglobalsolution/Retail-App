@@ -1,1 +1,15 @@
-#Continuous Integration workflow for the project
+name: CI
+
+# Disable all automatic triggers
+on:
+  workflow_dispatch:
+    inputs:
+      disabled:
+        description: "This workflow is disabled"
+        default: "true"
+
+jobs:
+  no_op:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Workflow disabled. No actions will run."

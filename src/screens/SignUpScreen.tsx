@@ -27,6 +27,16 @@ import Loader from "../components/shared/Loader";
 import { createUserInDB } from "@/services/firebase/userService";
 import { v4 as uuidv4 } from "uuid";
 
+// Shared Validation
+import {
+  normalizeEmail,
+  normalizeUsername,
+  validateEmail,
+  validatePassword,
+  validatePhone,
+  validateUsername,
+} from "@/services/validation/validationService";
+
 const SignUpScreen: React.FC = () => {
   const navigation = useNavigation();
 
@@ -43,67 +53,50 @@ const SignUpScreen: React.FC = () => {
   const handleSignUp = async () => {
     setMessage("");
 
-    // VALIDATIONS
-    if (!username.trim()) {
-      setMessage("Username is required");
+    // VALIDATION USING SHARED SERVICE
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setMessage(usernameError);
       setMessageType("error");
       return;
     }
 
-    if (username.trim().length < 8) {
-      setMessage("Username must be at least 8 characters");
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      setMessage(phoneError);
       setMessageType("error");
       return;
     }
 
-    if (!phone.trim()) {
-      setMessage("Phone number is required");
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setMessage(emailError);
       setMessageType("error");
       return;
     }
 
-    if (!/^\d{10}$/.test(phone.trim())) {
-      setMessage("Enter a valid 10-digit phone number");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setMessage(passwordError);
       setMessageType("error");
       return;
     }
 
-    if (!email.trim()) {
-      setMessage("Email is required");
-      setMessageType("error");
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email.trim())) {
-      setMessage("Enter a valid email");
-      setMessageType("error");
-      return;
-    }
-
-    if (!password.trim()) {
-      setMessage("Password is required");
-      setMessageType("error");
-      return;
-    }
-
-    if (password.length < 8) {
-      setMessage("Password must be at least 8 characters");
-      setMessageType("error");
-      return;
-    }
+    // NORMALIZE BEFORE SAVE
+    const normalizedUsername = normalizeUsername(username);
+    const normalizedEmail = normalizeEmail(email);
 
     // SAVE TO FIREBASE
     try {
       setLoading(true);
 
-      const uid = uuidv4(); // unique user id
+      const uid = uuidv4();
 
       await createUserInDB(uid, {
         uid,
-        username,
+        username: normalizedUsername, // save in lowercase
         phone,
-        email,
-        createdAt: Date.now(),
+        email: normalizedEmail, // save in lowercase
       });
 
       setMessage("Account created successfully!");
@@ -136,6 +129,7 @@ const SignUpScreen: React.FC = () => {
             align="center"
           />
 
+          {/* USERNAME - auto lowercase */}
           <TextInput
             mode="flat"
             label="Username"
@@ -143,12 +137,15 @@ const SignUpScreen: React.FC = () => {
             activeUnderlineColor={Colors.primary}
             style={[styles.input, { backgroundColor: Colors.white }]}
             value={username}
-            onChangeText={setUsername}
+            onChangeText={(text) => setUsername(text.toLowerCase())}
+            maxLength={15}
           />
 
+          {/* PHONE */}
           <TextInput
             mode="flat"
             label="Phone Number"
+            inputMode="numeric"
             keyboardType="phone-pad"
             underlineColor={Colors.black}
             activeUnderlineColor={Colors.primary}
@@ -156,8 +153,10 @@ const SignUpScreen: React.FC = () => {
             left={<TextInput.Affix text="+91 " />}
             value={phone}
             onChangeText={setPhone}
+            maxLength={10}
           />
 
+          {/* EMAIL - auto lowercase */}
           <TextInput
             mode="flat"
             label="Email"
@@ -166,9 +165,10 @@ const SignUpScreen: React.FC = () => {
             activeUnderlineColor={Colors.primary}
             style={[styles.input, { backgroundColor: Colors.white }]}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => setEmail(text.toLowerCase())}
           />
 
+          {/* PASSWORD */}
           <TextInput
             mode="flat"
             label="Password"
@@ -221,6 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
+    backgroundColor: Colors.secondary,
   },
   input: {
     marginVertical: Spacing.sm,
