@@ -46,6 +46,9 @@ pnpm add react-native-toast-message
 pnpm add uuid
 pnpm add @react-native-async-storage/async-storage
 pnpm add firebase@latest
+pnpm add react-native-get-random-values uuid
+pnpm add @react-native-async-storage/async-storage@^1.18.1
+pnpm add -g pnpm
 
 ---
 

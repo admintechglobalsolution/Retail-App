@@ -4,7 +4,7 @@ import Colors from "@/theme/colors";
 import Spacing from "@/theme/spacing";
 import Typography from "@/theme/typography";
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,

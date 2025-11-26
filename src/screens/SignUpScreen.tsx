@@ -23,11 +23,18 @@ import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
 import Loader from "../components/shared/Loader";
 
-// Firebase
-import { createUserInDB } from "@/services/firebase/userService";
+// Firebase Services
+import {
+  createUserInDB,
+  isEmailTaken,
+  isPhoneTaken,
+  isUsernameTaken,
+} from "@/services/firebase/userService";
+import "react-native-get-random-values";
+
 import { v4 as uuidv4 } from "uuid";
 
-// Shared Validation
+// Validation Services
 import {
   normalizeEmail,
   normalizeUsername,
@@ -53,64 +60,81 @@ const SignUpScreen: React.FC = () => {
   const handleSignUp = async () => {
     setMessage("");
 
-    // VALIDATION USING SHARED SERVICE
+    // VALIDATION
     const usernameError = validateUsername(username);
-    if (usernameError) {
-      setMessage(usernameError);
-      setMessageType("error");
-      return;
-    }
+    if (usernameError) return setError(usernameError);
 
     const phoneError = validatePhone(phone);
-    if (phoneError) {
-      setMessage(phoneError);
-      setMessageType("error");
-      return;
-    }
+    if (phoneError) return setError(phoneError);
 
     const emailError = validateEmail(email);
-    if (emailError) {
-      setMessage(emailError);
-      setMessageType("error");
-      return;
-    }
+    if (emailError) return setError(emailError);
 
     const passwordError = validatePassword(password);
-    if (passwordError) {
-      setMessage(passwordError);
-      setMessageType("error");
-      return;
-    }
+    if (passwordError) return setError(passwordError);
 
-    // NORMALIZE BEFORE SAVE
     const normalizedUsername = normalizeUsername(username);
     const normalizedEmail = normalizeEmail(email);
 
-    // SAVE TO FIREBASE
     try {
       setLoading(true);
 
+      // USERNAME EXISTS?
+      if (await isUsernameTaken(normalizedUsername)) {
+        setLoading(false);
+        return setError("Username already exists");
+      }
+
+      // PHONE EXISTS?
+      if (await isPhoneTaken(phone)) {
+        setLoading(false);
+        return setError("Phone number already exists");
+      }
+
+      // EMAIL EXISTS?
+      if (await isEmailTaken(normalizedEmail)) {
+        setLoading(false);
+        return setError("Email already exists");
+      }
+
+      // CREATE UID
       const uid = uuidv4();
 
+      // SAVE USER TO DB
       await createUserInDB(uid, {
         uid,
-        username: normalizedUsername, // save in lowercase
+        username: normalizedUsername,
         phone,
-        email: normalizedEmail, // save in lowercase
+        email: normalizedEmail,
       });
 
       setMessage("Account created successfully!");
       setMessageType("success");
 
+      // Redirect after success
       setTimeout(() => {
         navigation.navigate("Login" as never);
       }, 1200);
-    } catch (error) {
-      setMessage("Error creating account. Try again.");
-      setMessageType("error");
+    } catch (error: any) {
+      let msg = "Something went wrong";
+
+      if (error.code === "auth/email-already-in-use")
+        msg = "Email already exists";
+      else if (error.code === "auth/invalid-email")
+        msg = "Invalid email address";
+      else if (error.code === "auth/weak-password")
+        msg = "Password is too weak";
+      else msg = error.message || msg;
+
+      setError(msg);
     }
 
     setLoading(false);
+  };
+
+  const setError = (msg: string) => {
+    setMessage(msg);
+    setMessageType("error");
   };
 
   return (
@@ -129,7 +153,7 @@ const SignUpScreen: React.FC = () => {
             align="center"
           />
 
-          {/* USERNAME - auto lowercase */}
+          {/* USERNAME */}
           <TextInput
             mode="flat"
             label="Username"
@@ -145,7 +169,6 @@ const SignUpScreen: React.FC = () => {
           <TextInput
             mode="flat"
             label="Phone Number"
-            inputMode="numeric"
             keyboardType="phone-pad"
             underlineColor={Colors.black}
             activeUnderlineColor={Colors.primary}
@@ -156,7 +179,7 @@ const SignUpScreen: React.FC = () => {
             maxLength={10}
           />
 
-          {/* EMAIL - auto lowercase */}
+          {/* EMAIL */}
           <TextInput
             mode="flat"
             label="Email"
@@ -200,9 +223,8 @@ const SignUpScreen: React.FC = () => {
           <RowLink
             center
             leftLabel="Already have an account?"
-            leftHighlight={false}
             rightLabel="Login"
-            rightHighlight={true}
+            rightHighlight
             onRightPress={() => navigation.navigate("Login" as never)}
           />
 
