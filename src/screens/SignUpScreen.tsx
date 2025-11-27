@@ -17,24 +17,22 @@ import {
 } from "react-native";
 
 import { TextInput } from "react-native-paper";
-
 import CustomButton from "../components/shared/Button";
 import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
 import Loader from "../components/shared/Loader";
 
-// Firebase Services
+// Firebase
 import {
   createUserInDB,
   isEmailTaken,
   isPhoneTaken,
   isUsernameTaken,
 } from "@/services/firebase/userService";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import "react-native-get-random-values";
 
-import { v4 as uuidv4 } from "uuid";
-
-// Validation Services
+// Validation
 import {
   normalizeEmail,
   normalizeUsername,
@@ -57,6 +55,11 @@ const SignUpScreen: React.FC = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
 
+  const setError = (msg: string) => {
+    setMessage(msg);
+    setMessageType("error");
+  };
+
   const handleSignUp = async () => {
     setMessage("");
 
@@ -75,43 +78,47 @@ const SignUpScreen: React.FC = () => {
 
     const normalizedUsername = normalizeUsername(username);
     const normalizedEmail = normalizeEmail(email);
+    const fakeEmail = `${phone}@example.com`;
 
     try {
       setLoading(true);
 
-      // USERNAME EXISTS?
+      // CHECK DUPLICATES
       if (await isUsernameTaken(normalizedUsername)) {
         setLoading(false);
         return setError("Username already exists");
       }
-
-      // PHONE EXISTS?
       if (await isPhoneTaken(phone)) {
         setLoading(false);
         return setError("Phone number already exists");
       }
-
-      // EMAIL EXISTS?
       if (await isEmailTaken(normalizedEmail)) {
         setLoading(false);
         return setError("Email already exists");
       }
 
-      // CREATE UID
-      const uid = uuidv4();
+      // CREATE USER IN FIREBASE AUTH
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        fakeEmail,
+        password
+      );
 
-      // SAVE USER TO DB
+      const uid = userCredential.user.uid;
+
+      // SAVE USER INFO IN REALTIME DATABASE
       await createUserInDB(uid, {
         uid,
         username: normalizedUsername,
         phone,
         email: normalizedEmail,
+        authEmail: fakeEmail,
       });
 
       setMessage("Account created successfully!");
       setMessageType("success");
 
-      // Redirect after success
       setTimeout(() => {
         navigation.navigate("Login" as never);
       }, 1200);
@@ -130,11 +137,6 @@ const SignUpScreen: React.FC = () => {
     }
 
     setLoading(false);
-  };
-
-  const setError = (msg: string) => {
-    setMessage(msg);
-    setMessageType("error");
   };
 
   return (

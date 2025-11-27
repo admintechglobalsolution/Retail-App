@@ -1,4 +1,3 @@
-// src/screens/LoginScreen.tsx
 import RowLink from "@/components/shared/RowLink";
 import Colors from "@/theme/colors";
 import Spacing from "@/theme/spacing";
@@ -17,6 +16,12 @@ import CustomButton from "../components/shared/Button";
 import Header from "../components/shared/Header";
 import InlineMessage from "../components/shared/InlineMessage";
 
+// Firebase
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+// Helper to convert phone to Firebase-compatible email
+const phoneToEmail = (phone: string) => `${phone}@example.com`;
+
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
 
@@ -27,42 +32,38 @@ const LoginScreen: React.FC = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success">("error");
 
-  const handleLogin = () => {
+  const setError = (msg: string) => {
+    setMessage(msg);
+    setMessageType("error");
+  };
+
+  const handleLogin = async () => {
     setMessage("");
 
-    if (!phone.trim()) {
-      setMessage("Phone number is required");
-      setMessageType("error");
-      return;
-    }
-    if (!/^\d{10}$/.test(phone.trim())) {
-      setMessage("Enter a valid 10-digit phone number");
-      setMessageType("error");
-      return;
-    }
-    if (!password.trim()) {
-      setMessage("Password is required");
-      setMessageType("error");
-      return;
-    }
+    if (!phone.trim()) return setError("Phone number is required");
+    if (!/^\d{10}$/.test(phone.trim()))
+      return setError("Enter a valid 10-digit phone number");
+    if (!password.trim()) return setError("Password is required");
 
-    setLoading(true);
+    try {
+      setLoading(true);
+      const auth = getAuth();
+      const email = phoneToEmail(phone.trim());
+      await signInWithEmailAndPassword(auth, email, password);
 
-    setTimeout(() => {
+      setMessage("Successfully logged in!");
+      setMessageType("success");
+
+      setTimeout(() => {
+        navigation.navigate("Home" as never);
+      }, 800);
+    } catch (error: any) {
+      // Simplified error message
+      setError("Invalid credentials, try again");
+      setPassword(""); // Reset password field
+    } finally {
       setLoading(false);
-
-      if (phone === "1234567890" && password === "password") {
-        setMessage("Login successful!");
-        setMessageType("success");
-
-        setTimeout(() => {
-          navigation.navigate("Home" as never);
-        }, 1000);
-      } else {
-        setMessage("Invalid phone number or password");
-        setMessageType("error");
-      }
-    }, 1500);
+    }
   };
 
   return (
@@ -82,7 +83,6 @@ const LoginScreen: React.FC = () => {
           align="center"
         />
 
-        {/* Phone Input */}
         <TextInput
           mode="flat"
           label="Phone Number"
@@ -93,13 +93,12 @@ const LoginScreen: React.FC = () => {
           left={<TextInput.Affix text="+91 " />}
           value={phone}
           onChangeText={setPhone}
+          maxLength={10}
         />
 
-        {/* Password Input */}
         <TextInput
           mode="flat"
           label="Password"
-          placeholder="Enter your password"
           secureTextEntry={!showPassword}
           activeUnderlineColor={Colors.primary}
           style={[styles.input, { backgroundColor: Colors.white }]}
@@ -113,7 +112,6 @@ const LoginScreen: React.FC = () => {
           }
         />
 
-        {/* Login Button */}
         <CustomButton
           title="Login"
           onPress={handleLogin}
@@ -121,16 +119,14 @@ const LoginScreen: React.FC = () => {
           disabled={!phone.trim() || !password.trim() || loading}
         />
 
-        {/* Inline Message */}
         {message && <InlineMessage message={message} type={messageType} />}
 
-        {/* Bottom Links */}
         <RowLink
           leftLabel="Forgot Password?"
-          leftHighlight={true}
+          leftHighlight
           onLeftPress={() => navigation.navigate("ForgotPassword" as never)}
           rightLabel="Sign Up"
-          rightHighlight={true}
+          rightHighlight
           onRightPress={() => navigation.navigate("SignUp" as never)}
         />
       </ScrollView>
@@ -148,8 +144,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.lg,
   },
-  input: {
-    marginVertical: Spacing.sm,
-    fontSize: Typography.FontSize.body,
-  },
+  input: { marginVertical: Spacing.sm, fontSize: Typography.FontSize.body },
 });
